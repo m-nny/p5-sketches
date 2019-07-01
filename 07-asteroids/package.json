@@ -1,0 +1,23 @@
+{
+  "name": "06-neuro-flappy",
+  "version": "1.0.0",
+  "main": "src/sketch.js",
+  "scripts": {
+    "start": "rollup -c -w",
+    "build": "rimraf build && mkdirp build && rollup -c"
+  },
+  "author": "Alibek Manabayev <alibek.mananbayev@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/p5": "^0.7.2",
+    "mkdirp": "^0.5.1",
+    "rimraf": "^2.6.3",
+    "rollup": "^1.16.2",
+    "rollup-plugin-commonjs": "^10.0.1",
+    "rollup-plugin-node-resolve": "^5.1.0",
+    "rollup-plugin-sourcemaps": "^0.4.2",
+    "rollup-plugin-typescript2": "^0.21.2",
+    "tslib": "^1.10.0",
+    "typescript": "^3.5.2"
+  }
+}
