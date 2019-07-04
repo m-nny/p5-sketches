@@ -13,24 +13,28 @@ class Game {
   score = 0;
   alive = true;
   asteroidTimer = 0;
+  shootTimer = 0;
   private n_inputs = 8;
-  private n_hidden = 8;
+  private n_hidden = 4;
   private n_output = 4;
-  private action_threshold = .8;
+  private action_threshold = .80;
   private brain = new NeuralNetwork(this.n_inputs, this.n_hidden, this.n_output);
   get over() { return !this.alive }
 
   constructor(sketch: p5)
-  constructor(sketch: p5, n_asteroids: number)
-  constructor(sketch: p5, n_asteroids: number, realPlayer: boolean)
-  constructor(private sketch: p5, n_asteroids = 8, public bot = true) {
+  constructor(sketch: p5, bot: boolean)
+  constructor(sketch: p5, bot: boolean, n_asteroids: number)
+  constructor(private sketch: p5, public bot = true, n_asteroids = 8) {
     for (let i = 0; i < n_asteroids; i++) {
       this.spawnAsteriod();
     }
   }
 
   shoot() {
-    this.lasers.push(new Laser(this.sketch, this.ship.pos, this.ship.heading));
+    if (this.shootTimer <= 0) {
+      this.lasers.push(new Laser(this.sketch, this.ship.pos, this.ship.heading));
+      this.shootTimer = 30;
+    }
   }
 
   spawnAsteriod() {
@@ -48,10 +52,7 @@ class Game {
       this.score++;
     }
 
-    this.asteroidTimer--;
-    if (this.asteroidTimer <= 0) {
-      this.spawnAsteriod();
-    }
+    this.timers();
 
     this.asteroids.map(asteroid => asteroid.update());
     this.lasers.map(laser => laser.update());
@@ -61,6 +62,15 @@ class Game {
     if (this.alive) {
       this.collision();
     }
+  }
+
+  timers() {
+    this.asteroidTimer--;
+    if (this.asteroidTimer <= 0) {
+      this.spawnAsteriod();
+    }
+
+    this.shootTimer--;
   }
 
   private offsreen() {
@@ -139,7 +149,7 @@ class Game {
       direction.mult(600);
       this.sketch.line(this.ship.pos.x, this.ship.pos.y,
         this.ship.pos.x + direction.x, this.ship.pos.y + direction.y);
-      this.sketch.text(`lookaround ${i} ${d}`, this.sketch.width / 2, 160 + i * 40);
+      // this.sketch.text(`lookaround ${i} ${d}`, this.sketch.width / 2, 160 + i * 40);
     }
   }
 
@@ -172,18 +182,16 @@ class Game {
   }
 
   show() {
-    this.sketch.background(100);
+    // this.sketch.background(100);
 
     this.asteroids.map(asteroid => asteroid.show());
     this.lasers.map(laser => laser.show());
 
     this.ship.show();
 
-    this.sketch.fill(255);
-    this.sketch.text('Score ' + this.score, this.sketch.width / 2, 80);
-    this.sketch.text('Lasers ' + this.lasers.length, this.sketch.width / 2, 120);
+    // this.sketch.text('Lasers ' + this.lasers.length, this.sketch.width / 2, 120);
 
-    // this.drawLookAround();
+    this.drawLookAround();
   }
 
 }
