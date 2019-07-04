@@ -1,8 +1,10 @@
 import * as p5 from 'p5'
+import { NeuralNetwork } from 'toy-net';
 
 import Ship from './ship'
 import Asteroid from './asteroid'
 import Laser from './laser'
+import Obstacle from './Obstacle';
 
 class Game {
   ship = new Ship(this.sketch);
@@ -11,11 +13,17 @@ class Game {
   score = 0;
   alive = true;
   asteroidTimer = 0;
+  private n_inputs = 8;
+  private n_hidden = 8;
+  private n_output = 4;
+  private action_threshold = .8;
+  private brain = new NeuralNetwork(this.n_inputs, this.n_hidden, this.n_output);
   get over() { return !this.alive }
 
   constructor(sketch: p5)
   constructor(sketch: p5, n_asteroids: number)
-  constructor(private sketch: p5, n_asteroids = 8) {
+  constructor(sketch: p5, n_asteroids: number, realPlayer: boolean)
+  constructor(private sketch: p5, n_asteroids = 8, public bot = true) {
     for (let i = 0; i < n_asteroids; i++) {
       this.spawnAsteriod();
     }
@@ -32,6 +40,10 @@ class Game {
   }
 
   update() {
+    if (this.bot) {
+      this.think();
+    }
+
     if (this.alive) {
       this.score++;
     }
@@ -91,6 +103,74 @@ class Game {
     this.ship.turnStraight();
   }
 
+  private think() {
+    const inputs = this.lookAround();
+    const outputs = this.brain.feedforward(inputs);
+    // console.log(outputs);
+
+    // Boost
+    if (outputs[0] > this.action_threshold) {
+      this.ship.boosting(true);
+    } else {
+      this.ship.boosting(false);
+    }
+
+    // Turn left or right
+    if (outputs[1] > this.action_threshold) {
+      this.ship.turnLeft();
+    } else if (outputs[2] > this.action_threshold) {
+      this.ship.turnRight();
+    } else {
+      this.ship.turnStraight();
+    }
+
+    // Shoot
+    if (outputs[3] > this.action_threshold) {
+      this.shoot();
+    }
+  }
+
+  private drawLookAround() {
+    const lookAround = this.lookAround();
+    for (let i = 0; i < this.n_inputs; i++) {
+      const angle = this.ship.heading + this.sketch.map(i, 0, this.n_inputs, 0, this.sketch.PI * 2);
+      const direction = p5.Vector.fromAngle(this.ship.heading + angle);
+      const d = lookAround[i].toFixed(3);
+      direction.mult(600);
+      this.sketch.line(this.ship.pos.x, this.ship.pos.y,
+        this.ship.pos.x + direction.x, this.ship.pos.y + direction.y);
+      this.sketch.text(`lookaround ${i} ${d}`, this.sketch.width / 2, 160 + i * 40);
+    }
+  }
+
+  private lookAround(): number[] {
+    const d = [];
+    for (let i = 0; i < this.n_inputs; i++) {
+      const angle = this.ship.heading + this.sketch.map(i, 0, this.n_inputs, 0, this.sketch.PI * 2);
+      const direction = p5.Vector.fromAngle(this.ship.heading + angle);
+      direction.mult(10);
+
+      d[i] = this.lookInDirection(direction);
+    }
+    return d;
+  }
+
+  /// Returns inverse of distance to closest asteroid in particular direction
+  /// 0, if there is no obstacles until some threshold
+  private lookInDirection(direction: p5.Vector, threshold = 60): number {
+    let d = 0;
+    let checkpoint = new Obstacle(this.ship.pos.copy());
+
+    do {
+      checkpoint.pos.add(direction);
+      d += 1;
+      if (this.asteroids.some(asteroid => asteroid.hits(checkpoint))) {
+        return 1 / d;
+      }
+    } while (d < threshold);
+    return 0;
+  }
+
   show() {
     this.sketch.background(100);
 
@@ -102,7 +182,10 @@ class Game {
     this.sketch.fill(255);
     this.sketch.text('Score ' + this.score, this.sketch.width / 2, 80);
     this.sketch.text('Lasers ' + this.lasers.length, this.sketch.width / 2, 120);
+
+    // this.drawLookAround();
   }
+
 }
 
 export default Game;

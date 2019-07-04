@@ -19,7 +19,7 @@ const canvas = new p5((sketch: p5) => {
 
   sketch.keyPressed = function() {
     const { key, keyCode } = sketch;
-    if (game.over) {
+    if (game.over || game.bot) {
       return
     }
     if (key == ' ') {
@@ -38,7 +38,7 @@ const canvas = new p5((sketch: p5) => {
   }
 
   sketch.keyReleased = function() {
-    if (game.over) {
+    if (game.over || game.bot) {
       return
     }
     const { keyCode } = sketch;

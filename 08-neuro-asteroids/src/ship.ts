@@ -1,16 +1,17 @@
 import * as p5 from 'p5';
-import Asteroid from './asteroid';
+import Obstacle from './Obstacle';
 
-class Ship {
-  pos = this.sketch.createVector(this.sketch.width / 2, this.sketch.height / 2);
+class Ship extends Obstacle {
   private velocity = this.sketch.createVector(0, 0);
   private isBoosting = false;
   heading = 0;
-  private r = 15;
   private rotation = 0;
   private readonly rotationSpeed = .1;
 
-  constructor(private sketch: p5) { }
+  constructor(private sketch: p5) {
+    super(sketch.createVector(sketch.width / 2, sketch.height / 2), 15);
+  }
+
   show() {
     const { PI } = this.sketch;
     this.sketch.push();
@@ -67,11 +68,6 @@ class Ship {
     } else if (this.pos.y < -this.r) {
       this.pos.y = height + this.r;
     }
-  }
-
-  hits(asteroid: Asteroid) {
-    let d = this.sketch.dist(this.pos.x, this.pos.y, asteroid.pos.x, asteroid.pos.y);
-    return (d < this.r + asteroid.r);
   }
 }
 

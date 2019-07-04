@@ -1,17 +1,18 @@
 import * as p5 from 'p5';
+import Obstacle from './Obstacle';
 
-class Asteroid {
-  pos = this.sketch.createVector(
-    this.sketch.random(this.sketch.width),
-    this.sketch.random(this.sketch.height));
+class Asteroid extends Obstacle {
   private velocity = p5.Vector.random2D();
-  r = this.sketch.random(15, 50);
   private total = this.sketch.random(5, 15);
   private offset: number[] = [];
 
   constructor(sketch: p5)
   constructor(sketch: p5, pos: p5.Vector, r: number)
   constructor(private sketch: p5, pos?: p5.Vector, r?: number) {
+    super(sketch.createVector(
+      sketch.random(sketch.width),
+      sketch.random(sketch.height)),
+      sketch.random(15, 50));
     if (pos) {
       this.pos = pos.copy();
     }
