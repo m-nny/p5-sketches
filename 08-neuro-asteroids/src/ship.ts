@@ -8,10 +8,11 @@ class Ship {
   heading = 0;
   private r = 15;
   private rotation = 0;
+  private readonly rotationSpeed = .1;
 
   constructor(private sketch: p5) { }
   show() {
-		const {PI} = this.sketch;
+    const { PI } = this.sketch;
     this.sketch.push();
     this.sketch.translate(this.pos.x, this.pos.y);
     this.sketch.rotate(this.heading + PI / 2);
@@ -26,30 +27,36 @@ class Ship {
     if (this.isBoosting) {
       this.boost();
     }
-    this.pos.add(this.velocity);
+    this.heading += this.rotation; // turn ship
+
+    this.pos.add(this.velocity); // move ship
     this.velocity.mult(0.99);
   }
 
-  setRotation(value: number) {
-    this.rotation = value;
+  public turnLeft() {
+    this.rotation = -this.rotationSpeed;
+  }
+
+  public turnRight() {
+    this.rotation = +this.rotationSpeed;
+  }
+
+  public turnStraight() {
+    this.rotation = 0;
   }
 
   boosting(flag: boolean) {
     this.isBoosting = flag;
   }
 
-  boost() {
+  private boost() {
     var force = p5.Vector.fromAngle(this.heading);
     force.mult(.1);
     this.velocity.add(force);
   }
 
-  turn() {
-    this.heading += this.rotation;
-  }
-
   edges() {
-		const {height, width} = this.sketch;
+    const { height, width } = this.sketch;
     if (width + this.r < this.pos.x) {
       this.pos.x = -this.r;
     } else if (this.pos.x < -this.r) {

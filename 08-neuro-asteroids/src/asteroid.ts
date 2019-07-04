@@ -19,7 +19,8 @@ class Asteroid {
       this.r = r * .5;
     }
     for (let i = 0; i < this.total; i++) {
-      this.offset.push(this.sketch.random(-this.r * .5, this.r * .5));
+      this.offset.push(0);
+      // this.offset.push(this.sketch.random(-this.r * .5, this.r * .5));
     }
   }
 
@@ -60,7 +61,7 @@ class Asteroid {
     }
   }
 
-  breakup(): Asteroid[] {
+  breakup(): [Asteroid, Asteroid] {
     let newA = new Asteroid(this.sketch, this.pos, this.r);
     let newB = new Asteroid(this.sketch, this.pos, this.r);
     return [newA, newB];
